@@ -82,7 +82,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         ///< Typecast the binder to the service's LocalBinder class
         serviceBinder = (MetaWearBleService.LocalBinder) service;
 
-        final String MW_MAC_ADDRESS= "D0:92:E2:8C:30:BA";
+        //final String MW_MAC_ADDRESS= "D0:92:E2:8C:30:BA";
+        final String MW_MAC_ADDRESS= "D5:CD:CA:4B:66:23";
 
         final BluetoothManager btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         final BluetoothDevice remoteDevice = btManager.getAdapter().getRemoteDevice(MW_MAC_ADDRESS);
