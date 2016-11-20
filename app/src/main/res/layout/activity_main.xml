@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="" xmlns:tools="http://schemas.android.com/tools"
+        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/activity_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,4 +16,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true" android:layout_centerHorizontal="true" android:id="@+id/progressBar2"/>
+    <Button
+            android:text="Turn On"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:id="@+id/button_on" android:layout_alignParentTop="true" android:layout_alignParentEnd="true"/>
+    <Button
+            android:text="Turn Off"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:id="@+id/button_off" android:layout_alignParentTop="true" android:layout_alignParentStart="true"/>
 </RelativeLayout>
