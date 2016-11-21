@@ -6,25 +6,27 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import com.mbientlab.metawear.AsyncOperation;
 import com.mbientlab.metawear.MetaWearBleService;
 import com.mbientlab.metawear.MetaWearBoard;
 import com.mbientlab.metawear.UnsupportedModuleException;
 import com.mbientlab.metawear.module.Gpio;
-import com.mbientlab.metawear.module.IBeacon;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection {
     final byte GPIO_PIN = 0;
 
-    private MetaWearBleService.LocalBinder serviceBinder;
     private MetaWearBoard mwBoard;
     private ProgressBar progressBar;
     private Button buttonOn;
@@ -40,52 +42,42 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         buttonOn = (Button) findViewById(R.id.button_on);
         buttonOff = (Button) findViewById(R.id.button_off);
 
-        buttonOn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    Gpio gpioModule = mwBoard.getModule(Gpio.class);
-                    gpioModule.clearDigitalOut(GPIO_PIN);
-                } catch (UnsupportedModuleException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        View.OnClickListener turnOn = new PullSocket(Gpio.PullMode.PULL_UP);
+        View.OnClickListener turnOff = new PullSocket(Gpio.PullMode.PULL_DOWN);
 
-        buttonOff.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    Gpio gpioModule = mwBoard.getModule(Gpio.class);
-                    gpioModule.setDigitalOut(GPIO_PIN);
-                } catch (UnsupportedModuleException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        buttonOn.setOnClickListener(turnOn);
+        buttonOff.setOnClickListener(turnOff);
+    }
 
-        ///< Bind the service when the activity is created
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ///< Unbind the service when the activity is hidden
+        getApplicationContext().unbindService(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        progressBar.setVisibility(VISIBLE);
+        buttonOff.setVisibility(GONE);
+        buttonOn.setVisibility(GONE);
+
+        ///< Bind the service when the activity is shown
         getApplicationContext().bindService(new Intent(this, MetaWearBleService.class),
                 this, Context.BIND_AUTO_CREATE);
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        ///< Unbind the service when the activity is destroyed
-        getApplicationContext().unbindService(this);
-    }
-
-    @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         ///< Typecast the binder to the service's LocalBinder class
-        serviceBinder = (MetaWearBleService.LocalBinder) service;
+        MetaWearBleService.LocalBinder serviceBinder = (MetaWearBleService.LocalBinder) service;
 
         //final String MW_MAC_ADDRESS= "D0:92:E2:8C:30:BA";
-        final String MW_MAC_ADDRESS= "D5:CD:CA:4B:66:23";
+        final String MW_MAC_ADDRESS = "D5:CD:CA:4B:66:23";
 
-        final BluetoothManager btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
+        final BluetoothManager btManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         final BluetoothDevice remoteDevice = btManager.getAdapter().getRemoteDevice(MW_MAC_ADDRESS);
 
         serviceBinder.executeOnUiThread();
@@ -105,23 +97,17 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     @Override
                     public void success(MetaWearBoard.DeviceInformation result) {
                         Log.i("test", "Device Information: " + result.toString());
-                        progressBar.setVisibility(View.GONE);
+                        progressBar.setVisibility(GONE);
 
-                        buttonOn.setVisibility(View.VISIBLE);
-                        buttonOff.setVisibility(View.VISIBLE);
-
-                        final Gpio gpioModule;
-                        try {
-                            gpioModule = mwBoard.getModule(Gpio.class);
-                            gpioModule.setPinPullMode(GPIO_PIN, Gpio.PullMode.PULL_DOWN);
-                        } catch (UnsupportedModuleException e) {
-                            e.printStackTrace();
-                        }
+                        buttonOn.setVisibility(VISIBLE);
+                        buttonOff.setVisibility(VISIBLE);
                     }
 
                     @Override
                     public void failure(Throwable error) {
-                        Log.e("test", "Error reading device information", error);
+                        String msg = "Error reading device information: " + error.getLocalizedMessage();
+                        Log.e("test", msg, error);
+                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -143,5 +129,24 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     @Override
-    public void onServiceDisconnected(ComponentName componentName) { }
+    public void onServiceDisconnected(ComponentName componentName) {
+    }
+
+    private class PullSocket implements View.OnClickListener {
+        private final Gpio.PullMode pullMode;
+
+        PullSocket(Gpio.PullMode mode) {
+            this.pullMode = mode;
+        }
+
+        @Override
+        public void onClick(View view) {
+            try {
+                Gpio gpioModule = mwBoard.getModule(Gpio.class);
+                gpioModule.setPinPullMode(GPIO_PIN, pullMode);
+            } catch (UnsupportedModuleException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
