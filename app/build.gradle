@@ -1,3 +1,7 @@
+plugins {
+    id 'com.gladed.androidgitversion' version '0.3.3'
+}
+
 apply plugin: 'com.android.application'
 
 android {
@@ -7,8 +11,8 @@ android {
         applicationId "lt.andro.metasocket"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        versionName androidGitVersion.name()
+        versionCode androidGitVersion.code()
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -18,6 +22,7 @@ android {
         }
     }
 }
+
 repositories {
     ivy {
         url "http://ivyrep.mbientlab.com"
