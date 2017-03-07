@@ -24,6 +24,7 @@ import com.mbientlab.metawear.module.Gpio;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import timber.log.Timber;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.i("test", "Activity created");
+        Timber.i("Activity created");
         ButterKnife.bind(this);
     }
 
@@ -109,13 +110,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             public void connected() {
                 Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_LONG).show();
 
-                Log.i("test", "Connected");
-                Log.i("test", "MetaBoot? " + mwBoard.inMetaBootMode());
+                Timber.i("Connected");
+                Timber.i("MetaBoot? %s", mwBoard.inMetaBootMode());
 
                 mwBoard.readDeviceInformation().onComplete(new AsyncOperation.CompletionHandler<MetaWearBoard.DeviceInformation>() {
                     @Override
                     public void success(MetaWearBoard.DeviceInformation result) {
-                        Log.i("test", "Device Information: " + result.toString());
+                        Timber.i("Device information: %s", result.toString());
                         progressBar.setVisibility(GONE);
 
                         buttonOn.setVisibility(VISIBLE);
@@ -125,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     @Override
                     public void failure(Throwable error) {
                         String msg = "Error reading device information: " + error.getLocalizedMessage();
-                        Log.e("test", msg, error);
+                        Timber.e(error, msg);
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -134,13 +135,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             @Override
             public void disconnected() {
                 Toast.makeText(MainActivity.this, "Disconnected", Toast.LENGTH_LONG).show();
-                Log.i("test", "Disconnected");
+                Timber.i("Disconnected");
             }
 
             @Override
             public void failure(int status, final Throwable error) {
                 Toast.makeText(MainActivity.this, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                Log.e("test", "Error connecting", error);
+                Timber.e(error, "Error connecting");
             }
         });
 
