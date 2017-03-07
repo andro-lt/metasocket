@@ -21,6 +21,10 @@ import com.mbientlab.metawear.MetaWearBoard;
 import com.mbientlab.metawear.UnsupportedModuleException;
 import com.mbientlab.metawear.module.Gpio;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -28,9 +32,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     final byte GPIO_PIN = 0;
 
     private MetaWearBoard mwBoard;
-    private ProgressBar progressBar;
-    private Button buttonOn;
-    private Button buttonOff;
+
+    @BindView(R.id.main_progress_bar)
+    public ProgressBar progressBar;
+    @BindView(R.id.button_on)
+    public Button buttonOn;
+    @BindView(R.id.button_off)
+    public Button buttonOff;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,15 +46,26 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         setContentView(R.layout.activity_main);
 
         Log.i("test", "Activity created");
-        progressBar = (ProgressBar) findViewById(R.id.progressBar2);
-        buttonOn = (Button) findViewById(R.id.button_on);
-        buttonOff = (Button) findViewById(R.id.button_off);
+        ButterKnife.bind(this);
+    }
 
-        View.OnClickListener turnOn = new PullSocket(Gpio.PullMode.PULL_UP);
-        View.OnClickListener turnOff = new PullSocket(Gpio.PullMode.PULL_DOWN);
+    @OnClick(R.id.button_on)
+    public void onButtonOnClicked(View button) {
+        setMode(Gpio.PullMode.PULL_UP);
+    }
 
-        buttonOn.setOnClickListener(turnOn);
-        buttonOff.setOnClickListener(turnOff);
+    @OnClick(R.id.button_off)
+    public void onButtonOffClicked(View button) {
+        setMode(Gpio.PullMode.PULL_DOWN);
+    }
+
+    private void setMode(Gpio.PullMode pullMode) {
+        try {
+            Gpio gpioModule = mwBoard.getModule(Gpio.class);
+            gpioModule.setPinPullMode(GPIO_PIN, pullMode);
+        } catch (UnsupportedModuleException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -130,23 +149,5 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
-    }
-
-    private class PullSocket implements View.OnClickListener {
-        private final Gpio.PullMode pullMode;
-
-        PullSocket(Gpio.PullMode mode) {
-            this.pullMode = mode;
-        }
-
-        @Override
-        public void onClick(View view) {
-            try {
-                Gpio gpioModule = mwBoard.getModule(Gpio.class);
-                gpioModule.setPinPullMode(GPIO_PIN, pullMode);
-            } catch (UnsupportedModuleException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }
