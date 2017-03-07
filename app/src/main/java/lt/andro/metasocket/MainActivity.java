@@ -33,9 +33,16 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        Timber.i("Activity created");
 
         presenter = new MainActivityPresenterImpl(this, this);
-        Timber.i("Activity created");
+        presenter.onAttach();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.onDetach();
     }
 
     @OnClick(R.id.button_on)
@@ -46,18 +53,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     @OnClick(R.id.button_off)
     public void onButtonOffClicked(View button) {
         presenter.onButtonOffClicked();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        presenter.onDetach();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        presenter.onAttach();
     }
 
     @Override
