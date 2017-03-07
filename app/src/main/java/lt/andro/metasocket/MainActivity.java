@@ -1,10 +1,10 @@
 package lt.andro.metasocket;
 
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -19,8 +19,8 @@ import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity implements MainActivityView {
 
-    @BindView(R.id.main_progress_bar)
-    public ProgressBar progressBar;
+    @BindView(R.id.main_refresh_layout)
+    SwipeRefreshLayout refreshLayout;
     @BindView(R.id.button_on)
     public Button buttonOn;
     @BindView(R.id.button_off)
@@ -37,6 +37,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
         presenter = new MainActivityPresenterImpl(this, this);
         presenter.onAttach();
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                presenter.onRefreshRequested();
+            }
+        });
     }
 
     @Override
@@ -63,6 +70,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
     @Override
     public void showLoading(boolean loading) {
-        progressBar.setVisibility(loading ? VISIBLE : GONE);
+        refreshLayout.setRefreshing(loading);
     }
 }

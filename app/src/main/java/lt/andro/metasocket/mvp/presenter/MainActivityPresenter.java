@@ -10,4 +10,6 @@ public interface MainActivityPresenter extends ServiceConnection, BasePresenter 
     void onButtonOnClicked();
 
     void onButtonOffClicked();
+
+    void onRefreshRequested();
 }
