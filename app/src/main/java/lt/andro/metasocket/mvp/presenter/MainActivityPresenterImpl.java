@@ -14,6 +14,7 @@ import com.mbientlab.metawear.MetaWearBoard;
 import com.mbientlab.metawear.UnsupportedModuleException;
 import com.mbientlab.metawear.module.Gpio;
 
+import hugo.weaving.DebugLog;
 import lt.andro.metasocket.mvp.view.MainActivityView;
 import timber.log.Timber;
 
@@ -33,16 +34,19 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
         this.view = view;
     }
 
+    @DebugLog
     @Override
     public void onButtonOnClicked() {
         setMode(Gpio.PullMode.PULL_UP);
     }
 
+    @DebugLog
     @Override
     public void onButtonOffClicked() {
         setMode(Gpio.PullMode.PULL_DOWN);
     }
 
+    @DebugLog
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         ///< Typecast the binder to the service's LocalBinder class
@@ -100,10 +104,12 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
         mwBoard.connect();
     }
 
+    @DebugLog
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
     }
 
+    @DebugLog
     @Override
     public void onAttach() {
 
@@ -116,6 +122,7 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
                 .bindService(new Intent(context, MetaWearBleService.class), this, Context.BIND_AUTO_CREATE);
     }
 
+    @DebugLog
     @Override
     public void onDetach() {
         ///< Unbind the service when the activity is hidden
@@ -123,6 +130,7 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
     }
 
 
+    @DebugLog
     private void setMode(Gpio.PullMode pullMode) {
         try {
             Gpio gpioModule = mwBoard.getModule(Gpio.class);
