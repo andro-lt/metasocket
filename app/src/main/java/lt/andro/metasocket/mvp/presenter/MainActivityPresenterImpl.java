@@ -24,7 +24,7 @@ import timber.log.Timber;
  */
 public class MainActivityPresenterImpl implements MainActivityPresenter {
     private MetaWearBoard mwBoard;
-    private static final byte GPIO_PIN = 0;
+    private final byte GPIO_PIN = 0;
 
     private Context context;
     private MainActivityView view;
@@ -44,13 +44,6 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
     @Override
     public void onButtonOffClicked() {
         setMode(Gpio.PullMode.PULL_DOWN);
-    }
-
-    @DebugLog
-    @Override
-    public void onRefreshRequested() {
-        unbindService();
-        bindService();
     }
 
     @DebugLog
@@ -91,7 +84,6 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
                         String msg = "Error reading device information: " + error.getLocalizedMessage();
                         Timber.e(error, msg);
                         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-                        view.showLoading(false);
                     }
                 });
             }
@@ -100,14 +92,12 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
             public void disconnected() {
                 Toast.makeText(context, "Disconnected", Toast.LENGTH_LONG).show();
                 Timber.i("Disconnected");
-                view.showLoading(false);
             }
 
             @Override
             public void failure(int status, final Throwable error) {
                 Toast.makeText(context, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                 Timber.e(error, "Error connecting");
-                view.showLoading(false);
             }
         });
 
@@ -122,11 +112,7 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
     @DebugLog
     @Override
     public void onAttach() {
-        bindService();
-    }
 
-    @DebugLog
-    private void bindService() {
         view.showLoading(true);
         view.showOnOffButtons(false);
 
@@ -139,11 +125,6 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
     @DebugLog
     @Override
     public void onDetach() {
-        unbindService();
-    }
-
-    @DebugLog
-    private void unbindService() {
         ///< Unbind the service when the activity is hidden
         context.getApplicationContext().unbindService(this);
     }
