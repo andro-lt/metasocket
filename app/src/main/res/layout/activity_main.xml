@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:text="Turn On"
+        android:text="@string/main_turn_on"
         android:visibility="gone"
         tools:visibility="visible"
         />
@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:text="Turn Off"
+        android:text="@string/main_turn_off"
         android:visibility="gone"
         tools:visibility="visible"
         />
