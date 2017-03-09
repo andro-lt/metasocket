@@ -50,6 +50,14 @@ public class MainActivityPresenterImpl implements MainActivityPresenter, LightsL
     @DebugLog
     @Override
     public void onButtonOnClicked() {
+        turnOn();
+    }
+
+    private void turnOn() {
+        turnOff();
+    }
+
+    private void turnOff() {
         setMode(Gpio.PullMode.PULL_UP);
     }
 
@@ -180,20 +188,19 @@ public class MainActivityPresenterImpl implements MainActivityPresenter, LightsL
     @DebugLog
     @Override
     public void showListening(boolean listening) {
-        view.showMessage("Listening: " + listening);
-        view.showListening(listening);
+        setListening(listening);
     }
 
     @DebugLog
     @Override
     public void onTurnOnLightsCommandReceived() {
-        view.showMessage("ON command");
+        turnOn();
     }
 
     @DebugLog
     @Override
     public void onTurnOffLightsCommandReceived() {
-        view.showMessage("OFF command");
+        turnOff();
     }
 
     @DebugLog
