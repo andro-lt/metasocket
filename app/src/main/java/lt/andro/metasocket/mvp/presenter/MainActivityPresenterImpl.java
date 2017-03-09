@@ -55,20 +55,19 @@ public class MainActivityPresenterImpl implements MainActivityPresenter, LightsL
 
     @DebugLog
     private void turnOn() {
-        turnOff();
+        setMode(Gpio.PullMode.PULL_UP);
     }
 
     @DebugLog
     private void turnOff() {
-        setMode(Gpio.PullMode.PULL_UP);
+        setMode(Gpio.PullMode.PULL_DOWN);
     }
 
     @DebugLog
     @Override
     public void onButtonOffClicked() {
-        setMode(Gpio.PullMode.PULL_DOWN);
+        turnOff();
     }
-
 
     @DebugLog
     @Override
