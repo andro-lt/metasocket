@@ -2,6 +2,10 @@ package lt.andro.metasocket.voice;
 
 import android.content.Context;
 
+import com.google.gson.JsonElement;
+
+import java.security.InvalidParameterException;
+
 import ai.api.android.AIConfiguration;
 import ai.api.android.AIService;
 import ai.api.model.AIError;
@@ -20,7 +24,7 @@ public class LightsListenerImpl implements LightsListener {
     private static final String ACTION_LIGHT_SWITCH = "light.switch";
     private static final String PARAMETER_LIGHT_STATE = "light-state";
     private static final String VALUE_LIGHT_ON = "on";
-    private static final String VALUE_LIGHT_OFF = "on";
+    private static final String VALUE_LIGHT_OFF = "off";
 
     private final AIConfiguration config;
     private final AIService aiService;
@@ -61,14 +65,23 @@ public class LightsListenerImpl implements LightsListener {
         Result res = result.getResult();
         String action = res.getAction();
         if (action.equals(ACTION_LIGHT_SWITCH)) {
-            String lightState = res.getParameters().get(PARAMETER_LIGHT_STATE).getAsString();
-            if (lightState.equals(VALUE_LIGHT_ON)) {
-                presenter.onTurnOnLightsCommandReceived();
-            } else if (lightState.equals(VALUE_LIGHT_OFF)) {
-                presenter.onTurnOffLightsCommandReceived();
+            JsonElement el = res.getParameters().get(PARAMETER_LIGHT_STATE);
+            if (el != null) {
+                String lightState = el.getAsString();
+                switch (lightState) {
+                    case VALUE_LIGHT_ON:
+                        presenter.onTurnOnLightsCommandReceived();
+                        break;
+                    case VALUE_LIGHT_OFF:
+                        presenter.onTurnOffLightsCommandReceived();
+                        break;
+                    default:
+                        IllegalArgumentException exception = new IllegalArgumentException("Not expected light-state parameter value: " + lightState);
+                        presenter.onError(exception);
+                        break;
+                }
             } else {
-                IllegalArgumentException exception = new IllegalArgumentException("Not expected light-state parameter value: " + lightState);
-                presenter.onError(exception);
+                presenter.onError(new InvalidParameterException("Response not recognized"));
             }
         }
     }

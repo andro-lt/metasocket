@@ -53,10 +53,12 @@ public class MainActivityPresenterImpl implements MainActivityPresenter, LightsL
         turnOn();
     }
 
+    @DebugLog
     private void turnOn() {
         turnOff();
     }
 
+    @DebugLog
     private void turnOff() {
         setMode(Gpio.PullMode.PULL_UP);
     }
@@ -173,7 +175,11 @@ public class MainActivityPresenterImpl implements MainActivityPresenter, LightsL
     private void setMode(Gpio.PullMode pullMode) {
         try {
             Gpio gpioModule = mwBoard.getModule(Gpio.class);
-            gpioModule.setPinPullMode(Config.RELAY_SWITCH_GPIO_PIN, pullMode);
+            if (gpioModule != null) {
+                gpioModule.setPinPullMode(Config.RELAY_SWITCH_GPIO_PIN, pullMode);
+            } else {
+                onError(new IllegalStateException("Not connected to any light switches right now."));
+            }
         } catch (UnsupportedModuleException e) {
             e.printStackTrace();
         }
