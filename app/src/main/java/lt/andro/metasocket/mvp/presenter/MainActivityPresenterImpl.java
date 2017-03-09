@@ -1,12 +1,12 @@
 package lt.andro.metasocket.mvp.presenter;
 
+import android.Manifest;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-import android.widget.Toast;
 
 import com.mbientlab.metawear.AsyncOperation;
 import com.mbientlab.metawear.MetaWearBleService;
@@ -15,23 +15,36 @@ import com.mbientlab.metawear.UnsupportedModuleException;
 import com.mbientlab.metawear.module.Gpio;
 
 import hugo.weaving.DebugLog;
+import lt.andro.metasocket.Config;
 import lt.andro.metasocket.mvp.view.MainActivityView;
+import lt.andro.metasocket.permission.PermissionsController;
+import lt.andro.metasocket.voice.LightsListener;
 import timber.log.Timber;
 
 /**
  * @author Vilius Kraujutis
  * @since 2017-03-08
  */
-public class MainActivityPresenterImpl implements MainActivityPresenter {
+public class MainActivityPresenterImpl implements MainActivityPresenter, LightsListenerPresenter {
+    public static final String RECORD_AUDIO_PERMISSION = Manifest.permission.RECORD_AUDIO;
     private MetaWearBoard mwBoard;
-    private final byte GPIO_PIN = 0;
 
     private Context context;
     private MainActivityView view;
+    private LightsListener lightsListener;
+    private PermissionsController permissionsController;
+    private boolean isListening;
 
-    public MainActivityPresenterImpl(Context context, MainActivityView view) {
+    public MainActivityPresenterImpl(Context context,
+                                     MainActivityView view,
+                                     LightsListener lightsListener,
+                                     PermissionsController permissionsController) {
         this.context = context;
         this.view = view;
+        this.lightsListener = lightsListener;
+        this.permissionsController = permissionsController;
+
+        isListening = false;
     }
 
     @DebugLog
@@ -44,6 +57,30 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
     @Override
     public void onButtonOffClicked() {
         setMode(Gpio.PullMode.PULL_DOWN);
+    }
+
+
+    @DebugLog
+    @Override
+    public void onVoiceControlButtonClicked() {
+        setListening(!isListening);
+
+        if (isListening) {
+            if (permissionsController.hasPermissionGranted(RECORD_AUDIO_PERMISSION)) {
+                lightsListener.startListening(this);
+            } else {
+                setListening(false);
+                permissionsController.requestPermission(RECORD_AUDIO_PERMISSION);
+            }
+        } else {
+            lightsListener.stopListening();
+        }
+    }
+
+    @DebugLog
+    private void setListening(boolean listening) {
+        isListening = listening;
+        view.showListening(listening);
     }
 
     @DebugLog
@@ -66,7 +103,7 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
         mwBoard.setConnectionStateHandler(new MetaWearBoard.ConnectionStateHandler() {
             @Override
             public void connected() {
-                Toast.makeText(context, "Connected", Toast.LENGTH_LONG).show();
+                view.showMessage("Connected");
 
                 Timber.i("Connected");
                 Timber.i("MetaBoot? %s", mwBoard.inMetaBootMode());
@@ -83,20 +120,20 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
                     public void failure(Throwable error) {
                         String msg = "Error reading device information: " + error.getLocalizedMessage();
                         Timber.e(error, msg);
-                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+                        view.showMessage(msg);
                     }
                 });
             }
 
             @Override
             public void disconnected() {
-                Toast.makeText(context, "Disconnected", Toast.LENGTH_LONG).show();
+                view.showMessage("Disconnected");
                 Timber.i("Disconnected");
             }
 
             @Override
             public void failure(int status, final Throwable error) {
-                Toast.makeText(context, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                view.showMessage(error.getLocalizedMessage());
                 Timber.e(error, "Error connecting");
             }
         });
@@ -134,10 +171,47 @@ public class MainActivityPresenterImpl implements MainActivityPresenter {
     private void setMode(Gpio.PullMode pullMode) {
         try {
             Gpio gpioModule = mwBoard.getModule(Gpio.class);
-            gpioModule.setPinPullMode(GPIO_PIN, pullMode);
+            gpioModule.setPinPullMode(Config.RELAY_SWITCH_GPIO_PIN, pullMode);
         } catch (UnsupportedModuleException e) {
             e.printStackTrace();
         }
     }
 
+    @DebugLog
+    @Override
+    public void showListening(boolean listening) {
+        view.showMessage("Listening: " + listening);
+        view.showListening(listening);
+    }
+
+    @DebugLog
+    @Override
+    public void onTurnOnLightsCommandReceived() {
+        view.showMessage("ON command");
+    }
+
+    @DebugLog
+    @Override
+    public void onTurnOffLightsCommandReceived() {
+        view.showMessage("OFF command");
+    }
+
+    @DebugLog
+    @Override
+    public void onError(Throwable throwable) {
+        Timber.e(throwable);
+        view.showMessage(throwable.getLocalizedMessage());
+    }
+
+    @Override
+    public String toString() {
+        return "MainActivityPresenterImpl{" +
+                "mwBoard=" + mwBoard +
+                ", context=" + context +
+                ", view=" + view +
+                ", lightsListener=" + lightsListener +
+                ", permissionsController=" + permissionsController +
+                ", isListening=" + isListening +
+                '}';
+    }
 }

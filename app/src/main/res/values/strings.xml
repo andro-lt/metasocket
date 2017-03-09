@@ -2,4 +2,6 @@
     <string name="app_name">MetaSocket</string>
     <string name="main_turn_on">Turn On</string>
     <string name="main_turn_off">Turn Off</string>
+    <string name="main_voice_button_listen">Start listening</string>
+    <string name="main_voice_button_listening">Stop listening…</string>
 </resources>
