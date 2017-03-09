@@ -86,12 +86,6 @@ public class MainActivityPresenterImpl implements MainActivityPresenter, LightsL
     }
 
     @DebugLog
-    private void setListening(boolean listening) {
-        isListening = listening;
-        view.showListening(listening);
-    }
-
-    @DebugLog
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         ///< Typecast the binder to the service's LocalBinder class
@@ -187,8 +181,9 @@ public class MainActivityPresenterImpl implements MainActivityPresenter, LightsL
 
     @DebugLog
     @Override
-    public void showListening(boolean listening) {
-        setListening(listening);
+    public void setListening(boolean listening) {
+        isListening = listening;
+        view.showListening(listening);
     }
 
     @DebugLog

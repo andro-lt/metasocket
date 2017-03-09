@@ -88,19 +88,19 @@ public class LightsListenerImpl implements LightsListener {
     @DebugLog
     @Override
     public void onListeningStarted() {
-        presenter.showListening(true);
+        presenter.setListening(true);
     }
 
     @DebugLog
     @Override
     public void onListeningCanceled() {
-        presenter.showListening(false);
+        presenter.setListening(false);
     }
 
     @DebugLog
     @Override
     public void onListeningFinished() {
-        presenter.showListening(false);
+        presenter.setListening(false);
     }
 
     @Override

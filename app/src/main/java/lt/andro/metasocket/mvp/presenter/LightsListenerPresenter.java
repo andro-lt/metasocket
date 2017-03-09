@@ -5,7 +5,7 @@ package lt.andro.metasocket.mvp.presenter;
  * @since 2017-03-09
  */
 public interface LightsListenerPresenter {
-    void showListening(boolean listening);
+    void setListening(boolean listening);
 
     void onTurnOnLightsCommandReceived();
 
